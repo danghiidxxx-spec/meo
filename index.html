@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung tâm nạp thẻ chính thức - Garena Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Giả lập khung viền màn hình điện thoại để giống ảnh chụp */
+        .phone-container {
+            width: 100%;
+            max-width: 430px;
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        /* Khung chứa các màn hình khác nhau */
+        .page {
+            display: none;
+            width: 100%;
+        }
+        
+        .page.active {
+            display: block;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .garena-logo {
+            width: 35px;
+            height: 35px;
+            background-color: #e41a1c;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .user-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #757575;
+        }
+
+        /* Banner Quảng cáo ShopeePay / Sự kiện */
+        .promo-banner {
+            width: 100%;
+            display: block;
+        }
+        
+        .promo-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Game List Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px 8px;
+            padding: 16px;
+            background: linear-gradient(to bottom, #ffffff, #fdfdfd);
+        }
+
+        .game-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            position: relative;
+        }
+
+        .game-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: #ddd;
+            position: relative;
+            transition: transform 0.1s ease;
+        }
+
+        .game-item:active .game-icon {
+            transform: scale(0.95);
+        }
+
+        /* Tick đỏ cho game đang chọn */
+        .game-item.active .game-icon::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-color: #e41a1c;
+            color: white;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 6px 0 6px 0;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .game-name {
+            font-size: 11px;
+            line-height: 1.2;
+            height: 28px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Banner thông tin game */
+        .banner-container {
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+        .banner {
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.3s ease;
+            position: relative;
+            min-height: 69px;
+        }
+
+        /* Lớp phủ mờ nhẹ giúp text trên banner dễ đọc hơn nếu ảnh sáng */
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            z-index: 0;
+        }
+
+        .banner-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            background-color: rgba(255,255,255,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-info h3 {
+            font-size: 15px;
+            margin-bottom: 4px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .banner-badge {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Các bước (Steps) */
+        .step-section {
+            padding: 0 16px;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .step-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-number {
+            background-color: #e41a1c;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Nút đăng xuất kiểu mới theo ảnh mẫu */
+        .btn-logout-link {
+            display: none;
+            color: #e41a1c;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Step 1: Đăng nhập */
+        .login-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #ebebeb;
+        }
+
+        .input-label {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        .input-group input:focus {
+            border-color: #e41a1c;
+        }
+
+        .btn-login {
+            background-color: #e41a1c;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Khung hiển thị sau khi đã Đăng nhập giống ảnh chụp */
+        .logged-box {
+            display: none;
+            background-color: #f4f5f6;
+            border-radius: 8px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logged-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-image: url('https://cdn-gop.garenanow.com/gop/app/0000/100/067/icon.png');
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logged-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .logged-uid {
+            font-size: 14px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .social-login-text {
+            font-size: 12px;
+            color: #757575;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .bg-fb { background-color: #1877f2; }
+        .bg-gg { background-color: #ffffff; border: 1px solid #ddd; color: #555; }
+        .bg-x { background-color: #111111; }
+        .bg-vk { background-color: #0077ff; }
+
+        /* Step 2: Mệnh giá */
+        .tab-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            background-color: white;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .tab-btn.active {
+            border-color: #e41a1c;
+            color: #e41a1c;
+            background-color: #fff8f8;
+        }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .price-item {
+            background-color: #f8f9fa;
+            border: 1px solid #ebebeb;
+            border-radius: 6px;
+            padding: 10px 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .price-item.selected {
+            border-color: #e41a1c;
+            background-color: #fff8f8;
+        }
+
+        .amount-vnd {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .amount-diamond {
+            font-size: 11px;
+            color: #00bcd4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        /* Step 3: Phương thức thanh toán */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .payment-item {
+            border: 1px solid #ebebeb;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+            min-height: 65px;
+        }
+
+        .payment-item.selected {
+            border-color: #e41a1c;
+            background-color: #fff8f8;
+        }
+
+        .payment-item .hot-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            color: #fff;
+            font-size: 8px;
+            padding: 1px 4px;
+            border-radius: 0 6px 0 6px;
+            font-weight: bold;
+        }
+
+        .payment-icon {
+            width: 35px;
+            height: 35px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .payment-name {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Vùng nút xác nhận nạp tiền lớn ở cuối */
+        .submit-section {
+            padding: 10px 16px 20px 16px;
+        }
+
+        .btn-submit-payment {
+            width: 100%;
+            background-color: #e41a1c;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(228, 26, 28, 0.2);
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit-payment:active {
+            transform: scale(0.99);
+            background-color: #cc1618;
+        }
+
+        /* Vùng thanh toán nổi lên giống Ảnh 1 */
+        .nap-ngay-popup {
+            display: none;
+            border-top: 1px solid #ddd;
+            padding: 14px 16px;
+            background-color: #fff;
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .popup-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .popup-diamond-row {
+            font-weight: bold;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .popup-price-row {
+            font-size: 14px;
+            color: #333;
+        }
+        .popup-price-row span {
+            color: #e41a1c;
+            font-weight: bold;
+        }
+        .btn-nap-ngay {
+            background-color: #e41a1c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        /* Footer Info */
+        .footer-info {
+            padding: 20px 16px;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            line-height: 1.5;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        .footer-links a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        /* --- STYLE CHO TRANG 2: SHOPPEEPAY (ANH 2) --- */
+        .sp-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+        .sp-btn-back {
+            border: 1px solid #ccc;
+            background: none;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .sp-header-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .sp-header-game-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            margin: 16px auto 8px auto;
+            background-size: cover;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sp-game-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .sp-info-list {
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sp-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .sp-info-item .label { color: #666; }
+        .sp-info-item .val { font-weight: 500; }
+        .sp-info-item .val.price { color: #333; font-weight: bold; }
+        .sp-info-item .val.diamond { display: flex; align-items: center; gap: 4px; }
+        
+        .sp-promo-section {
+            padding: 16px;
+        }
+        .sp-promo-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sp-promo-input-group {
+            display: flex;
+            gap: 8px;
+        }
+        .sp-promo-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            font-size: 13px;
+        }
+        .sp-btn-apply {
+            background-color: #fbc2c4;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .sp-footer-text {
+            font-size: 10px;
+            color: #aaa;
+            text-align: center;
+            padding: 20px 16px;
+            line-height: 1.4;
+        }
+        .sp-url-bar {
+            background-color: #f0f0f0;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            gap: 6px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* --- STYLE CHO TRANG 3: LOADING (ANH 3) --- */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e41a1c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .loading-sub {
+            font-size: 13px;
+            color: #777;
+        }
+
+        /* --- STYLE CHO TRANG 4: HOAN TAT (ANH 4) --- */
+        .success-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 16px;
+        }
+        .success-icon-circle {
+            width: 55px;
+            height: 55px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+        .success-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .success-txid {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .success-details-box {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        .success-row {
+            display: flex;
+            justify-content:
